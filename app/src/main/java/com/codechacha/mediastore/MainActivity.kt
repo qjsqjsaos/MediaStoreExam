@@ -3,6 +3,11 @@ package com.codechacha.mediastore
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +29,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import java.util.*
@@ -49,13 +56,48 @@ class MainActivity : AppCompatActivity() {
 
         galleryAdapter.setOnItemClickListener(object: GalleryAdapter.OnItemClickListener {
             override fun onItemClick(mediaStoreImage: MediaStoreImage) {
+
+                //위엔꺼는 bitmap 반환
                 Glide.with(image)
+                    .asBitmap()
                     .load(mediaStoreImage.contentUri)
-                    .centerCrop()
-                    .into(image)
+                    .into(object : CustomTarget<Bitmap>(){
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            image.setImageBitmap(resource)
+                        }
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            // this is called when imageView is cleared on lifecycle call or for
+                            // some other reason.
+                            // if you are referencing the bitmap somewhere else too other than this imageView
+                            // clear it here as you can no longer have the bitmap
+                        }
+                    })
+
+                //아래꺼는 기본
+
+//                Glide.with(image)
+//                    .load(mediaStoreImage.contentUri)
+//                    .centerCrop()
+//                    .into(image)
             }
 
         })
+
+//        //이미지 겹치기 연습중
+//        button.setOnClickListener{
+//
+//            val resources: Resources = this.resources
+//            val bitmap1 = BitmapFactory.decodeResource(resources, R.drawable.ic_launcher_foreground)
+//
+//
+//            val resources2: Resources = this.resources
+//            val bitmap2 = BitmapFactory.decodeResource(resources2, R.drawable.ic_launcher_background)
+//
+//            val resources3: Resources = this.resources
+//            val drawable = BitmapDrawable(resources3, ImageUtil.overlay(bitmap1, bitmap2))
+//            result.setImageDrawable(drawable)
+//
+//        }
 
         images.observe(this, Observer<List<MediaStoreImage>> { images ->
             galleryAdapter.submitList(images)
@@ -235,6 +277,7 @@ class MainActivity : AppCompatActivity() {
                     images += image
                     Log.d(TAG, image.toString())
                 }
+                cursor.close()
             }
         }
 
