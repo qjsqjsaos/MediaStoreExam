@@ -12,7 +12,8 @@ data class MediaStoreImage(
     val id: Long,
     val displayName: String,
     val dateTaken: Date,
-    val contentUri: Uri
+    val contentUri: Uri,
+    val bucketDisplayName: String
 ) {
     companion object {
         val DiffCallback = object : DiffUtil.ItemCallback<MediaStoreImage>() {
